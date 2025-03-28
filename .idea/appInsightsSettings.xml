@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.houseactive" />
+                  <option name="mobileSdkAppId" value="1:652975267476:android:712722abb08e6f18b65e81" />
+                  <option name="projectId" value="device-streaming-8cbaf890" />
+                  <option name="projectNumber" value="652975267476" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
