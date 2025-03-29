@@ -45,8 +45,21 @@ android {
 dependencies {
     // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:33.11.0"))
-    implementation("com.google.firebase:firebase-auth")
+    implementation(libs.google.firebase.auth)
+    implementation(libs.firebase.ui.auth)
+    // FirebaseUI for Firebase Realtime Database
+    implementation("com.firebaseui:firebase-ui-database:9.0.0")
+    // FirebaseUI for Cloud Firestore
+    implementation("com.firebaseui:firebase-ui-firestore:9.0.0")
+    // FirebaseUI for Firebase Auth
+    implementation("com.firebaseui:firebase-ui-auth:9.0.0")
+    // FirebaseUI for Cloud Storage
+    implementation("com.firebaseui:firebase-ui-storage:9.0.0")
+    implementation("io.coil-kt.coil3:coil-compose:3.1.0")
 
+    implementation(libs.firebase.auth.ktx)
+    implementation(libs.credentials)
+    implementation(libs.googleid)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -60,8 +73,6 @@ dependencies {
     implementation(libs.ui.tooling.preview)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
-    implementation(libs.lifecycle.runtime.ktx)
-    implementation(libs.activity.compose)
     implementation(libs.androidx.datastore.preferences)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
