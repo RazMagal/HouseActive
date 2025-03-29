@@ -1,0 +1,9 @@
+app/src/main/java/com/example/houseactive/
+│── MainActivity.kt          // Manages Navigation
+│── ui/
+│   ├── screens/
+│   │   ├── LoginScreen.kt   // Sign-in UI
+│   │   ├── TaskScreen.kt    // Task list UI
+│   ├── viewmodels/
+│   │   ├── AuthViewModel.kt // Handles sign-in logic
+│   │   ├── TaskViewModel.kt // Manages task data

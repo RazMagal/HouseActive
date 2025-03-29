@@ -37,6 +37,9 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import com.example.houseactive.ui.theme.FirebaseAuthTheme
+import com.example.houseactive.ui.screens.LoginScreen
+import com.example.houseactive.ui.screens.TaskScreen
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,119 +49,12 @@ class MainActivity : ComponentActivity() {
             FirebaseAuthTheme {
                 // Navigation controller to manage navigation between screens
                 val navController = rememberNavController()
-
                 // Setting up the navigation graph
                 NavHost(navController = navController, startDestination = "login") {
                     composable("login") { LoginScreen(navController) }
                     composable("taskScreen") { TaskScreen() }
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun LoginScreen(navController: NavHostController) {
-    var user by remember { mutableStateOf(Firebase.auth.currentUser) }
-
-    // Firebase Auth launcher for Google Sign-In
-    val launcher = rememberFirebaseAuthLauncher(
-        onAuthComplete = { result -> user = result.user },
-        onAuthError = { user = null }
-    )
-    val token = stringResource(R.string.default_web_client_id)
-    val context = LocalContext.current
-
-    // Layout for the login screen
-    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            if (user == null) {
-                Text("Not logged in")
-                Spacer(Modifier.height(10.dp))
-                Button(onClick = {
-                    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestIdToken(token)
-                        .requestEmail()
-                        .build()
-                    val googleSignInClient = GoogleSignIn.getClient(context, gso)
-                    launcher.launch(googleSignInClient.signInIntent)
-                }) {
-                    Text("Sign in via Google")
-                }
-            } else {
-                // Show profile picture and welcome message
-                AsyncImage(
-                    model = ImageRequest.Builder(context)
-                        .data(user!!.photoUrl)
-                        .build(),
-                    contentScale = ContentScale.Crop,
-                    contentDescription = null,
-                    modifier = Modifier.size(96.dp).clip(CircleShape)
-                )
-                Spacer(Modifier.height(8.dp))
-                Text("Welcome ${user!!.displayName}")
-                Spacer(Modifier.height(10.dp))
-                Button(onClick = {
-                    Firebase.auth.signOut()
-                    user = null
-                }) {
-                    Text("Sign out")
-                }
-
-                // Navigate to the TaskScreen after login
-                LaunchedEffect(user) {
-                    navController.navigate("taskScreen")
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun TaskScreen() {
-    // Mock list of tasks
-    val tasks = listOf(
-        "Buy groceries",
-        "Walk the dog",
-        "Complete Kotlin project",
-        "Read a book",
-        "Workout"
-    )
-
-    // Layout for displaying tasks in rows
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text("Your Tasks", modifier = Modifier.padding(bottom = 8.dp))
-        for (task in tasks) {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(task) // Task description
-                Button(onClick = { /* Handle task click */ }) {
-                    Text("Done")
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun rememberFirebaseAuthLauncher(
-    onAuthComplete: (AuthResult) -> Unit,
-    onAuthError: (ApiException) -> Unit
-): ManagedActivityResultLauncher<Intent, ActivityResult> {
-    val scope = rememberCoroutineScope()
-    return rememberLauncherForActivityResult(StartActivityForResult()) { result ->
-        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-        try {
-            val account = task.getResult(ApiException::class.java)!!
-            val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
-            scope.launch {
-                val authResult = Firebase.auth.signInWithCredential(credential).await()
-                onAuthComplete(authResult)
-            }
-        } catch (e: ApiException) {
-            onAuthError(e)
         }
     }
 }
