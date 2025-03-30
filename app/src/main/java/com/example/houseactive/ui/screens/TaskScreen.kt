@@ -8,21 +8,16 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.houseactive.ui.viewmodels.TaskViewModel
 
-import android.widget.Toast
-import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun TaskScreen(taskViewModel: TaskViewModel = viewModel()) {
     val tasks by taskViewModel.tasks.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
-    var newTaskTitle by remember { mutableStateOf("") }
+    var newTaskName by remember { mutableStateOf("") }
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
@@ -35,7 +30,13 @@ fun TaskScreen(taskViewModel: TaskViewModel = viewModel()) {
             Text("Your Tasks", style = MaterialTheme.typography.headlineSmall)
             tasks.forEach { task ->
                 Text(task.name, modifier = Modifier.padding(8.dp))
+                Button(
+                    onClick = { taskViewModel.completeTask(task.id) }
+                ) {
+                    Text("Complete")
+                }
             }
+
         }
     }
 
@@ -45,17 +46,26 @@ fun TaskScreen(taskViewModel: TaskViewModel = viewModel()) {
             onDismissRequest = { showDialog = false },
             title = { Text("Add New Task") },
             text = {
-                OutlinedTextField(
-                    value = newTaskTitle,
-                    onValueChange = { newTaskTitle = it },
-                    label = { Text("Task Title") }
-                )
+                Column {
+                    // TODO: Add to Task ShortDescription and repeating options
+//                    OutlinedTextField(
+//                        value = newTaskId,
+//                        onValueChange = { newTaskId = it },
+//                        label = { Text("Task id") }
+//                    )
+//                    Spacer(modifier = Modifier.height(16.dp))
+                    OutlinedTextField(
+                        value = newTaskName,
+                        onValueChange = { newTaskName = it },
+                        label = { Text("Task Name") }
+                    )
+                }
             },
             confirmButton = {
                 Button(onClick = {
-                    if (newTaskTitle.isNotEmpty()) {
-                        taskViewModel.addTask(newTaskTitle, newTaskTitle, false)
-                        newTaskTitle = ""
+                    if (newTaskName.isNotEmpty()) {
+                        taskViewModel.addTask(newTaskName, false)
+                        newTaskName = ""
                         showDialog = false
                     }
                 }) {

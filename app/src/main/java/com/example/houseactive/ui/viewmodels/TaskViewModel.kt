@@ -19,21 +19,31 @@ class TaskViewModel : ViewModel() {
     }
 
     // Add a new task to Firestore
-    fun addTask(id: String, name: String, isCompleted: Boolean) {
-        val newTask = Task(id = id, name = name, isCompleted = isCompleted)
+    fun addTask(name: String, completed: Boolean) {
+        val newTask = Task(name = name, completed = completed)
         tasksCollection.add(newTask) // Add task to Firestore
     }
-
+    // Mark a task as completed (this will remove it from UI)
+    fun completeTask(taskId: String) {
+        tasksCollection.document(taskId)
+            .update("completed", true)
+            .addOnSuccessListener {
+                // Remove task from UI after successful update
+                _tasks.value = _tasks.value.filter { it.id != taskId }
+            }   
+    }
     // Fetch tasks in real-time (Firestore listener)
+    // Fetch only tasks where completed == false
     private fun fetchTasks() {
         tasksCollection.orderBy("name", Query.Direction.ASCENDING)
+            .whereEqualTo("completed", false) // Only get incomplete tasks
             .addSnapshotListener { snapshot, e ->
                 if (snapshot != null) {
                     val taskList = snapshot.documents.map { doc ->
                         Task(
                             id = doc.id,
                             name = doc.getString("name") ?: "",
-                            isCompleted = doc.getBoolean("isCompleted") ?: false
+                            completed = doc.getBoolean("completed") ?: false
                         )
                     }
                     _tasks.value = taskList  // Update task list
