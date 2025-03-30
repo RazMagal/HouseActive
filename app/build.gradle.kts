@@ -56,11 +56,11 @@ dependencies {
     // FirebaseUI for Cloud Storage
     implementation("com.firebaseui:firebase-ui-storage:9.0.0")
     implementation("io.coil-kt.coil3:coil-compose:3.1.0")
-
-    implementation ("androidx.navigation:navigation-fragment-ktx:2.4.0")
-    implementation ("androidx.navigation:navigation-ui-ktx:2.4.0")
-    implementation ("androidx.navigation:navigation-compose:2.4.0-rc01")
-
+    implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation("androidx.compose.material:material-icons-extended:1.5.3")
+    implementation("androidx.navigation:navigation-fragment-ktx:2.4.0")
+    implementation("androidx.navigation:navigation-ui-ktx:2.4.0")
+    implementation("androidx.navigation:navigation-compose:2.4.0-rc01")
     implementation(libs.firebase.auth.ktx)
     implementation(libs.credentials)
     implementation(libs.googleid)

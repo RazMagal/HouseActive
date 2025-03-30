@@ -71,9 +71,10 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel = vie
                 }) {
                     Text("Sign out")
                 }
-
-                LaunchedEffect(user) {
+                Button(onClick = {
                     navController.navigate("taskScreen")
+                }) {
+                    Text("Procced to app")
                 }
             }
         }
