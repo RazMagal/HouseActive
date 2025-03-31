@@ -13,11 +13,22 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.ui.Modifier
 
+/**
+ * TaskScreen is a composable function that represents the UI for displaying and managing tasks.
+ * It follows the MVVM (Model-View-ViewModel) architecture pattern.
+ *
+ * @param taskViewModel The ViewModel that provides the data and business logic for the screen.
+ */
 @Composable
 fun TaskScreen(taskViewModel: TaskViewModel = viewModel()) {
+    // Collect the list of tasks from the ViewModel as a state. This ensures the UI updates when the data changes.
     val tasks by taskViewModel.tasks.collectAsState()
+    // State to control whether the "Add Task" dialog is visible
     var showDialog by remember { mutableStateOf(false) }
+    // State to hold the name of the new task being added
     var newTaskName by remember { mutableStateOf("") }
+    
+    // Scaffold provides a basic layout structure with a floating action button
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
@@ -26,12 +37,17 @@ fun TaskScreen(taskViewModel: TaskViewModel = viewModel()) {
             )
         }
     ) { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding).padding(16.dp)) {
+        // Column is a vertical layout container
+        Column(modifier = Modifier
+                .padding(innerPadding) // Padding to avoid overlapping with system UI
+                .padding(16.dp)        // Additional padding for spacing
+                ) {
+            // Display a header for the task list
             Text("Your Tasks", style = MaterialTheme.typography.headlineSmall)
             tasks.forEach { task ->
                 Text(task.name, modifier = Modifier.padding(8.dp))
                 Button(
-                    onClick = { taskViewModel.completeTask(task.id) }
+                    onClick = { taskViewModel.completeTask(task.id) } // Call ViewModel to complete the task
                 ) {
                     Text("Complete")
                 }
@@ -43,12 +59,13 @@ fun TaskScreen(taskViewModel: TaskViewModel = viewModel()) {
     // Dialog for adding new task
     if (showDialog) {
         AlertDialog(
-            onDismissRequest = { showDialog = false },
-            title = { Text("Add New Task") },
+            onDismissRequest = { showDialog = false }, // Close the dialog when dismissed
+            title = { Text("Add New Task") },          // Dialog title
             text = {
                 Column {
                     // TODO: Add to Task ShortDescription and repeating options
-//                    OutlinedTextField(
+                    // Input field for the new task name
+//                  OutlinedTextField(
 //                        value = newTaskId,
 //                        onValueChange = { newTaskId = it },
 //                        label = { Text("Task id") }
@@ -56,23 +73,24 @@ fun TaskScreen(taskViewModel: TaskViewModel = viewModel()) {
 //                    Spacer(modifier = Modifier.height(16.dp))
                     OutlinedTextField(
                         value = newTaskName,
-                        onValueChange = { newTaskName = it },
-                        label = { Text("Task Name") }
+                        onValueChange = { newTaskName = it }, // Update state as user types
+                        label = { Text("Task Name") }         // Label for the input field
                     )
                 }
             },
             confirmButton = {
                 Button(onClick = {
                     if (newTaskName.isNotEmpty()) {
-                        taskViewModel.addTask(newTaskName, false)
-                        newTaskName = ""
-                        showDialog = false
+                        taskViewModel.addTask(newTaskName, false) // Add the task via ViewModel
+                        newTaskName = ""   // Reset the input field
+                        showDialog = false // Close the dialog
                     }
                 }) {
                     Text("Add")
                 }
             },
             dismissButton = {
+                // Button to cancel adding a new task
                 Button(onClick = { showDialog = false }) { Text("Cancel") }
             }
         )

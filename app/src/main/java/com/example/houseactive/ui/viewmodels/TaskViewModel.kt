@@ -7,46 +7,92 @@ import com.example.houseactive.Task
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 
+/**
+ * TaskViewModel is responsible for managing the task data and business logic.
+ * It follows the MVVM architecture pattern, acting as the "ViewModel" layer.
+ * 
+ * This ViewModel interacts with Firestore to fetch, add, and update tasks.
+ * It exposes a `StateFlow` of tasks to the UI, ensuring real-time updates.
+ */
 class TaskViewModel : ViewModel() {
     private val firestore = FirebaseFirestore.getInstance()    // Firestore instance
     private val tasksCollection = firestore.collection("tasks") // Firestore collection reference
+    
+    // Backing property for the list of tasks (mutable)
+    private val _tasks = MutableStateFlow<List<Task>>(emptyList()) // MutableStateFlow holds the current state of tasks
+    val tasks = _tasks.asStateFlow() // Exposed as an immutable StateFlow to the UI
 
-    private val _tasks = MutableStateFlow<List<Task>>(emptyList()) // StateFlow to observe task list
-    val tasks = _tasks.asStateFlow()
-
+    // Initialize the ViewModel by fetching tasks from Firestore
     init {
         fetchTasks()  // Load tasks when ViewModel is created
     }
 
-    // Add a new task to Firestore
+    /**
+     * Adds a new task to the Firestore database.
+     * 
+     * @param name The name of the task.
+     * @param completed Whether the task is completed (default is false).
+     */
     fun addTask(name: String, completed: Boolean) {
-        val newTask = Task(name = name, completed = completed)
-        tasksCollection.add(newTask) // Add task to Firestore
+        // Create a map for the task data to send to Firestore
+        val taskData = mapOf(
+            "name" to name,
+            "completed" to completed
+            )
+        
+        // Add the task data to the Firestore "tasks" collection BEFORE creating new local Task
+        tasksCollection.add(taskData)
+            // On success, update the local task list with the new task
+            .addOnSuccessListener { documentReference ->
+                // Create the Task object locally based on the Firebase object
+                val newTask = Task(
+                                id = documentReference.id, // Assign Firestore document ID
+                                name = name,
+                                completed = completed
+                                )
+            }
+        // Add task to UI
+        // Update the local task list with the new task
+        val updatedTasks = _tasks.value.toMutableList()
+        updatedTasks.add(newTask)
+        _tasks.value = updatedTasks // Update the StateFlow with the new task list
     }
-    // Mark a task as completed (this will remove it from UI)
+    
+    /**
+     * Marks a task as completed in Firestore and removes it from the UI.
+     * 
+     * @param taskId The ID of the task to mark as completed.
+     */
     fun completeTask(taskId: String) {
+        // Update the "completed" field of the task in Firestore
         tasksCollection.document(taskId)
             .update("completed", true)
             .addOnSuccessListener {
-                // Remove task from UI after successful update
+                // On success, remove the task from the local task list
                 _tasks.value = _tasks.value.filter { it.id != taskId }
             }   
     }
-    // Fetch tasks in real-time (Firestore listener)
-    // Fetch only tasks where completed == false
+    
+    /**
+     * Fetches tasks from Firestore in real-time using a snapshot listener.
+     * 
+     * Only tasks where `completed == false` are fetched and displayed.
+     */
     private fun fetchTasks() {
+        // Query Firestore for tasks ordered by name and where completed == false
         tasksCollection.orderBy("name", Query.Direction.ASCENDING)
             .whereEqualTo("completed", false) // Only get incomplete tasks
             .addSnapshotListener { snapshot, e ->
                 if (snapshot != null) {
+                    // Map Firestore documents to Task objects
                     val taskList = snapshot.documents.map { doc ->
                         Task(
-                            id = doc.id,
-                            name = doc.getString("name") ?: "",
-                            completed = doc.getBoolean("completed") ?: false
+                            id = doc.id, // Firestore document ID
+                            name = doc.getString("name") ?: "", // Task name
+                            completed = doc.getBoolean("completed") ?: false // Task completion status
                         )
                     }
-                    _tasks.value = taskList  // Update task list
+                    _tasks.value = taskList  // Update the StateFlow with the fetched tasks
                 }
             }
     }

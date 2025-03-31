@@ -26,55 +26,81 @@ import com.google.firebase.ktx.Firebase
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 
+/**
+ * LoginScreen is a composable function that handles user authentication.
+ * It allows users to sign in via Google, sign out, and navigate to the main app.
+ *
+ * @param navController The NavController used for navigation between screens.
+ * @param authViewModel The ViewModel responsible for authentication logic.
+ */
 @Composable
 fun LoginScreen(navController: NavController, authViewModel: AuthViewModel = viewModel()) {
+    // State to track the currently signed-in user
     var user by remember { mutableStateOf(Firebase.auth.currentUser) }
+    
+    // Retrieve the Google Sign-In client ID from resources
     val token = stringResource(com.example.houseactive.R.string.default_web_client_id)
+    
+    // Get the current context (used for creating the Google Sign-In client)
     val context = LocalContext.current
 
+    // Launcher for handling the result of the Google Sign-In activity
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        // Call the AuthViewModel's signIn function to handle authentication
         authViewModel.signIn(result.data!!, { authResult ->
             user = authResult.user
         }, {
+            // On authentication error, set the user state to null
             user = null
         })
     }
 
+    // Box layout to center the content on the screen
     Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+        // Column layout to stack UI elements vertically
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            // Display when the user is not logged in
             if (user == null) {
                 Text("Not logged in")
                 Spacer(Modifier.height(10.dp))
                 Button(onClick = {
+                    // Configure Google Sign-In options
                     val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestIdToken(token)
-                        .requestEmail()
+                        .requestIdToken(token) // Request the ID token for Firebase authentication
+                        .requestEmail() // Request the user's email
                         .build()
+                        
+                    // Create a Google Sign-In client
                     val googleSignInClient = GoogleSignIn.getClient(context, gso)
+                    
+                    // Launch the Google Sign-In activity
                     launcher.launch(googleSignInClient.signInIntent)
                 }) {
-                    Text("Sign in via Google")
+                    Text("Sign in via Google") // Button text
                 }
             } else {
+                // Display when the user is logged in
                 AsyncImage(
-                    model = ImageRequest.Builder(context).data(user!!.photoUrl).build(),
+                    model = ImageRequest.Builder(context).data(user!!.photoUrl).build(), // Load the user's profile picture
                     contentScale = ContentScale.Crop,
-                    contentDescription = null,
-                    modifier = Modifier.size(96.dp).clip(CircleShape)
+                    contentDescription = null, // No content description for accessibility
+                    modifier = Modifier.size(96.dp).clip(CircleShape) // Circular profile picture
                 )
                 Spacer(Modifier.height(8.dp))
-                Text("Welcome ${user!!.displayName}")
+                Text("Welcome ${user!!.displayName}") // Display the user's name
                 Spacer(Modifier.height(10.dp))
                 Button(onClick = {
+                    // Sign out the user and reset the user state
                     authViewModel.signOut()
                     user = null
                 }) {
-                    Text("Sign out")
+                    Text("Sign out") // Button text
                 }
                 Button(onClick = {
+                    // Navigate to the task screen
                     navController.navigate("taskScreen")
                 }) {
-                    Text("Procced to app")
+                    Text("Procced to app") // Button text
                 }
             }
         }
