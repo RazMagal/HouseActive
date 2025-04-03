@@ -1,13 +1,13 @@
 package com.example.houseactive.ui.screens
 
-import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,7 +37,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 fun LoginScreen(navController: NavController, authViewModel: AuthViewModel = viewModel()) {
     // State to track the currently signed-in user
     var user by remember { mutableStateOf(Firebase.auth.currentUser) }
-    
+    var openDialog by remember { mutableStateOf(false) }
     // Retrieve the Google Sign-In client ID from resources
     val token = stringResource(com.example.houseactive.R.string.default_web_client_id)
     
@@ -101,6 +101,30 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel = vie
                     navController.navigate("taskScreen")
                 }) {
                     Text("Procced to app") // Button text
+                }
+                Button(onClick = {
+                    openDialog = true
+                }) {
+                    Text("Delete user data")
+                }
+                if (openDialog) {
+                    AlertDialog(
+                        onDismissRequest = {
+                            openDialog = false
+                        },
+                        title = { Text("Are you sure?") },
+                        text = { Text("This action will permanently delete your data.") },
+                        confirmButton = {
+                            TextButton(onClick = {
+//                                authViewModel.deleteUserData()
+                                openDialog = false
+                                user= null
+                            }) {
+                                Text("Yes")
+                            }
+                        },
+                        dismissButton = { TextButton(onClick = { openDialog = false }) { Text("No") } }
+                    )
                 }
             }
         }

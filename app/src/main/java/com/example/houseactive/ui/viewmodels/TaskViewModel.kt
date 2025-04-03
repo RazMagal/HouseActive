@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import com.example.houseactive.Task
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.auth.FirebaseAuth
 
 /**
  * TaskViewModel is responsible for managing the task data and business logic.
@@ -15,9 +16,17 @@ import com.google.firebase.firestore.Query
  * It exposes a `StateFlow` of tasks to the UI, ensuring real-time updates.
  */
 class TaskViewModel : ViewModel() {
-    private val firestore = FirebaseFirestore.getInstance()    // Firestore instance
-    private val tasksCollection = firestore.collection("tasks") // Firestore collection reference
-    
+    private val auth = FirebaseAuth.getInstance()
+    private val user = auth.currentUser
+    private val userId = auth.currentUser?.uid
+    private val firestore = FirebaseFirestore.getInstance()
+
+
+    private val usersCollection = firestore.collection("users")
+    private val userDocuemnt = usersCollection.document(userId ?: "")
+    private val tasksCollection = userDocuemnt.collection("tasks")
+
+
     // Backing property for the list of tasks (mutable)
     private val _tasks = MutableStateFlow<List<Task>>(emptyList()) // MutableStateFlow holds the current state of tasks
     val tasks = _tasks.asStateFlow() // Exposed as an immutable StateFlow to the UI
@@ -39,7 +48,7 @@ class TaskViewModel : ViewModel() {
             "name" to name,
             "completed" to completed
             )
-        
+
         // Add the task data to the Firestore "tasks" collection BEFORE creating new local Task
         tasksCollection.add(taskData)
             // On success, update the local task list with the new task
@@ -50,12 +59,13 @@ class TaskViewModel : ViewModel() {
                                 name = name,
                                 completed = completed
                                 )
+                // Add task to UI
+                // Update the local task list with the new task
+                val updatedTasks = _tasks.value.toMutableList()
+                updatedTasks.add(newTask)
+                _tasks.value = updatedTasks // Update the StateFlow with the new task list
             }
-        // Add task to UI
-        // Update the local task list with the new task
-        val updatedTasks = _tasks.value.toMutableList()
-        updatedTasks.add(newTask)
-        _tasks.value = updatedTasks // Update the StateFlow with the new task list
+
     }
     
     /**
@@ -79,6 +89,7 @@ class TaskViewModel : ViewModel() {
      * Only tasks where `completed == false` are fetched and displayed.
      */
     private fun fetchTasks() {
+        if (userId == null) return
         // Query Firestore for tasks ordered by name and where completed == false
         tasksCollection.orderBy("name", Query.Direction.ASCENDING)
             .whereEqualTo("completed", false) // Only get incomplete tasks

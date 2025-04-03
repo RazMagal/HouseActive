@@ -11,6 +11,10 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
+
+
 import kotlinx.coroutines.tasks.await
 
 
@@ -23,6 +27,9 @@ import kotlinx.coroutines.tasks.await
 class AuthViewModel : ViewModel() {
     // Firebase Authentication instance
     val auth = Firebase.auth
+
+    // Firebase Firestore instance
+    private val firestore: FirebaseFirestore = Firebase.firestore
 
     /**
      * Handles Google Sign-In and authenticates the user with Firebase.
@@ -50,6 +57,15 @@ class AuthViewModel : ViewModel() {
                     val authResult = auth.signInWithCredential(credential).await()
                     // Invoke the success callback with the authentication result
                     onAuthComplete(authResult)
+
+                    // Create a user document in Firestore if it doesn't exist
+                    var userId = authResult.user!!.uid
+                    val userData = mapOf(
+                        "id" to userId,
+                    )
+                    firestore.collection("users").document(userId).set(userData)
+
+
                 } catch (e: Exception) {
                     // Invoke the error callback if an exception occurs
                     onAuthError(e)
@@ -66,5 +82,33 @@ class AuthViewModel : ViewModel() {
      */
     fun signOut() {
         auth.signOut() // Firebase sign-out
+    }
+
+    /**
+     * Deletes all data associated with the currently authenticated user.
+     * This includes the user's Firebase Authentication account and their data in Firestore.
+     *
+     * @param onComplete Callback invoked when deletion is successful.
+     * @param onError Callback invoked when an error occurs, passing the Exception.
+     */
+    fun deleteUserData(onComplete: () -> Unit, onError: (Exception) -> Unit) {
+        viewModelScope.launch {
+            val user = auth.currentUser
+            if (user != null) {
+                try {
+                    // Delete user data from Firestore
+                    val userDocRef = firestore.collection("users").document(user.uid)
+                    userDocRef.delete().await()
+                    // Delete the authenticated user's account from Firebase Auth
+                    user.delete().await()
+                    onComplete()
+                } catch (e: Exception) {
+                    onError(e)
+                }
+            } else {
+                 // Handle the case where there's no current user
+                onError(Exception("No user is currently authenticated"))
+            }
+        }
     }
 }
