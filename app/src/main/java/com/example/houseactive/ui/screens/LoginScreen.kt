@@ -1,5 +1,6 @@
 package com.example.houseactive.ui.screens
 
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
@@ -116,7 +117,17 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel = vie
                         text = { Text("This action will permanently delete your data.") },
                         confirmButton = {
                             TextButton(onClick = {
-//                                authViewModel.deleteUserData()
+                                authViewModel.deleteUserData(
+                                    onComplete = {
+                                        // Successfully deleted the user data.
+                                        Toast.makeText(context, "Data deleted Successfully", Toast.LENGTH_LONG).show()
+
+                                    },
+                                    onError = { exception ->
+                                        // Handle the error as needed (e.g., show a toast message).
+                                        Toast.makeText(context, "Error deleting data", Toast.LENGTH_LONG).show()
+                                    }
+                                )
                                 openDialog = false
                                 user= null
                             }) {
