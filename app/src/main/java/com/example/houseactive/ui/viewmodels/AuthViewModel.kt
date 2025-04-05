@@ -59,12 +59,18 @@ class AuthViewModel : ViewModel() {
                     onAuthComplete(authResult)
 
                     // Create a user document in Firestore if it doesn't exist
-                    var userId = authResult.user!!.uid
+                    val userId = authResult.user!!.uid
+                    
                     val userData = mapOf(
                         "id" to userId,
                     )
-                    firestore.collection("users").document(userId).set(userData)
-
+                    
+                    // Check if the user document already exists
+                    val userDoc = firestore.collection("users").document(userId).get().await()
+                    if (!userDoc.exists()) {
+                        // Create the document only if it doesn't exist
+                        firestore.collection("users").document(userId).set(userData).await()
+                    }
 
                 } catch (e: Exception) {
                     // Invoke the error callback if an exception occurs
