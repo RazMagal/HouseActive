@@ -101,7 +101,7 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel = vie
                     // Navigate to the task screen
                     navController.navigate("taskScreen")
                 }) {
-                    Text("Procced to app") // Button text
+                    Text("Proceed to app") // Button text
                 }
                 Button(onClick = {
                     openDialog = true
