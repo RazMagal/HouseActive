@@ -1,9 +1,5 @@
 import React from 'react';
-
-interface Task {
-  id: string;
-  name?: string;
-}
+import { Task } from '../types';
 
 interface TaskListProps {
   tasks: Task[];

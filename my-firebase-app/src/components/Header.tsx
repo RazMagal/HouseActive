@@ -1,8 +1,9 @@
 import React from 'react';
 import SignInButton from './SignInButton';
+import { User } from '../types';
 
 interface HeaderProps {
-  user?: any; // Replace 'any' with a specific type if you know the structure of 'user'
+  user?: User;
 }
 
 const Header: React.FC<HeaderProps> = ({ user }) => (

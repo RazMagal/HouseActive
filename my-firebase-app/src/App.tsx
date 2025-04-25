@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
 import './App.css';
-import SignInButton from './components/SignInButton';
 import { auth } from './assets/config/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db } from './assets/config/firebase';
 import { collection, doc, getDocs, deleteDoc } from 'firebase/firestore';
 import Header from '../src/components/Header';
 import UserProfile from '../src/components/UserProfile';
+import { User, Task } from './types';
 
 function App() {
   const [count, setCount] = useState(0); // State to manage the counter
   const [user] = useAuthState(auth); // Hook to manage authentication state
-  const [tasks, setTasks] = useState<any[]>([]); // State to store tasks fetched from Firestore
+  const [tasks, setTasks] = useState<Task[]>([]); // State to store tasks fetched from Firestore
 
   useEffect(() => {
     const fetchTasks = async () => {

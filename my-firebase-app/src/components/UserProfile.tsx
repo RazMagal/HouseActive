@@ -1,14 +1,10 @@
 import React from 'react';
 import TaskList from './TaskList';
+import { User, Task } from '../types';
 
 interface UserProfileProps {
-  user: {
-    displayName?: string;
-    photoURL?: string;
-    email?: string;
-    uid?: string;
-  };
-  tasks: any[]; // Replace 'any[]' with a specific type if available
+  user: User;
+  tasks: Task[];
   deleteAllData: () => void;
 }
 
