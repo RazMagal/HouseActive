@@ -6,7 +6,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.houseactive.ui.viewmodels.TaskViewModel
+import com.example.houseactive.viewmodels.TaskViewModel
 
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons

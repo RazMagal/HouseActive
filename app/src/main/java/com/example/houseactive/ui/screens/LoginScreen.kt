@@ -21,7 +21,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
-import com.example.houseactive.ui.viewmodels.AuthViewModel
+import com.example.houseactive.viewmodels.AuthViewModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.google.android.gms.auth.api.signin.GoogleSignIn
