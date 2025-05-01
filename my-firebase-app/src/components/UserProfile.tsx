@@ -1,6 +1,7 @@
 import React from 'react';
 import TaskList from './TaskList';
 import { User, Task } from '../types';
+import { auth } from '../assets/config/firebase';
 
 interface UserProfileProps {
   user: User;

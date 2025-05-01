@@ -1,6 +1,6 @@
 import React from 'react';
 import SignInButton from './SignInButton';
-import { User } from '../types';
+import { User } from '../types.ts';
 
 interface HeaderProps {
   user?: User;

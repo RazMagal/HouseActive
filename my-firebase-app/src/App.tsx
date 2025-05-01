@@ -4,9 +4,9 @@ import { auth } from './assets/config/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db } from './assets/config/firebase';
 import { collection, doc, getDocs, deleteDoc } from 'firebase/firestore';
-import Header from '../src/components/Header';
-import UserProfile from '../src/components/UserProfile';
-import { User, Task } from './types';
+import Header from './components/Header';
+import UserProfile from './components/UserProfile';
+import { Task } from './types.ts';
 
 function App() {
   const [count, setCount] = useState(0); // State to manage the counter
