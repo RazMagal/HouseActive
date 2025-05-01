@@ -44,6 +44,9 @@ class TaskViewModel : ViewModel() {
         }
     }
 
+    private val _taskCompleted = MutableStateFlow(false)
+    val taskCompleted = _taskCompleted.asStateFlow()
+
     /**
      * Marks a task as completed in Firestore and removes it from the UI.
      *
@@ -54,6 +57,7 @@ class TaskViewModel : ViewModel() {
             val success = taskModel.completeTask(taskId)
             if (success) {
                 _tasks.value = _tasks.value.filter { it.id != taskId }
+                _taskCompleted.value = true // Signal task completion
             }
         }
     }
@@ -63,5 +67,9 @@ class TaskViewModel : ViewModel() {
      */
     private fun fetchTasks() {
         taskModel.fetchTasks(_tasks)
+    }
+
+    fun resetTaskCompletedSignal() {
+        _taskCompleted.value = false
     }
 }

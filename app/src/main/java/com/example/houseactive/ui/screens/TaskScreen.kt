@@ -1,9 +1,13 @@
 package com.example.houseactive.ui.screens
 
+import android.util.Log
+import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.houseactive.viewmodels.TaskViewModel
@@ -11,7 +15,6 @@ import com.example.houseactive.viewmodels.TaskViewModel
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.ui.Modifier
 
 /**
  * TaskScreen is a composable function that represents the UI for displaying and managing tasks.
@@ -21,8 +24,19 @@ import androidx.compose.ui.Modifier
  */
 @Composable
 fun TaskScreen(taskViewModel: TaskViewModel = viewModel()) {
-    // Collect the list of tasks from the ViewModel as a state. This ensures the UI updates when the data changes.
     val tasks by taskViewModel.tasks.collectAsState()
+    val taskCompleted by taskViewModel.taskCompleted.collectAsState()
+
+    var showAnimation by remember { mutableStateOf(false) }
+
+    LaunchedEffect(taskCompleted) {
+        if (taskCompleted) {
+            Log.d("TaskScreen", "Task completed signal received. Triggering animation.")
+            showAnimation = true
+            taskViewModel.resetTaskCompletedSignal() // Reset the signal
+        }
+    }
+
     // State to control whether the "Add Task" dialog is visible
     var showDialog by remember { mutableStateOf(false) }
     // State to hold the name of the new task being added
@@ -63,14 +77,6 @@ fun TaskScreen(taskViewModel: TaskViewModel = viewModel()) {
             title = { Text("Add New Task") },          // Dialog title
             text = {
                 Column {
-                    // TODO: Add to Task ShortDescription and repeating options
-                    // Input field for the new task name
-//                  OutlinedTextField(
-//                        value = newTaskId,
-//                        onValueChange = { newTaskId = it },
-//                        label = { Text("Task id") }
-//                    )
-//                    Spacer(modifier = Modifier.height(16.dp))
                     OutlinedTextField(
                         value = newTaskName,
                         onValueChange = { newTaskName = it }, // Update state as user types
@@ -94,5 +100,41 @@ fun TaskScreen(taskViewModel: TaskViewModel = viewModel()) {
                 Button(onClick = { showDialog = false }) { Text("Cancel") }
             }
         )
+    }
+
+    // Move CelebrationAnimation to the end of the layout hierarchy to ensure it is drawn on top
+    if (showAnimation) {
+        CelebrationAnimation(onAnimationEnd = {
+            Log.d("TaskScreen", "Animation ended. Hiding animation.")
+            showAnimation = false
+        })
+    }
+}
+
+@Composable
+fun CelebrationAnimation(onAnimationEnd: () -> Unit) {
+    var visible by remember { mutableStateOf(true) }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        AnimatedVisibility(
+            visible = visible,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            Text(
+                "🎉 Task Completed! 🎉",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
+
+        LaunchedEffect(Unit) {
+            Log.d("CelebrationAnimation", "Animation started.")
+            kotlinx.coroutines.delay(2000) // Show animation for 2 seconds
+            Log.d("CelebrationAnimation", "Animation delay completed.")
+            visible = false // Trigger fade-out animation
+            kotlinx.coroutines.delay(300) // Wait for fade-out to complete
+            onAnimationEnd()
+        }
     }
 }
