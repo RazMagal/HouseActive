@@ -6,12 +6,14 @@ import { db } from './assets/config/firebase';
 import { collection, doc, getDocs, deleteDoc } from 'firebase/firestore';
 import Header from './components/Header';
 import UserProfile from './components/UserProfile';
-import { Task } from './types.ts';
+import { Task, User } from './types.ts';
 
 function App() {
   const [count, setCount] = useState(0); // State to manage the counter
-  const [user] = useAuthState(auth); // Hook to manage authentication state
+  const [user, setUser] = useState<User | null>(null); // State to manage authentication state
   const [tasks, setTasks] = useState<Task[]>([]); // State to store tasks fetched from Firestore
+
+  const showAlert = (message: string) => window.alert(message); // Function to show alert messages
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -53,13 +55,13 @@ function App() {
         setTasks([]); // Clear tasks from the state to reflect changes in the UI
         await auth.signOut(); // Sign out the user after deleting their data
 
-        alert('All data deleted successfully!');
+        showAlert('All data deleted successfully!');
       } catch (error) {
         console.error('Error deleting data:', error); // Log any errors
-        alert('Failed to delete data. Please try again.');
+        showAlert('Failed to delete data. Please try again.');
       }
     } else {
-      alert('No user is signed in.'); // Alert if no user is signed in
+      showAlert('No user is signed in.'); // Alert if no user is signed in
     }
   };
 
